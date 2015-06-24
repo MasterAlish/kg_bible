@@ -84,7 +84,7 @@ class BibleBookParser(object):
                         if len(name) > 0:
                             break
                         self.last_index = match.regs[0][1]
-                        name = self._fix_kg_letters(match.groups()[0])
+                        name = self._fix_kg_letters(header_match.groups()[0])
                         continue
 
                     self.last_index = match.regs[0][1]

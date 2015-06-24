@@ -10,16 +10,22 @@ class BibleSqliteSaver(object):
         self._init_tables()
         for book in self.bible.books:
             book_id = self.conn.execute("INSERT INTO 'books' (name) values ('%s')" % book.name).lastrowid
+            chapter_number = 0
             for chapter in book.chapters:
-                chapter_id = self.conn.execute("INSERT INTO 'chapters' (name, book_id) values ('%s', '%d')" %
-                                               (chapter.name, book_id)).lastrowid
+                chapter_number += 1
+                chapter_id = self.conn.execute("INSERT INTO 'chapters' (name, book_id, number) values ('%s', '%d', '%d')" %
+                                               (chapter.name, book_id, chapter_number)).lastrowid
+                header_number = 0
+                verse_number = 0
                 for header in chapter.headers:
-                    header_id = self.conn.execute("INSERT INTO 'headers' (name, chapter_id) values ('%s', '%d')" %
-                                                  (header.name, chapter_id)).lastrowid
+                    header_number += 1
+                    header_id = self.conn.execute("INSERT INTO 'headers' (name, chapter_id, number) values ('%s', '%d', '%d')" %
+                                                  (header.name, chapter_id, header_number)).lastrowid
                     for verse in header.verses:
+                        verse_number += 1
                         try:
-                            self.conn.execute("INSERT INTO 'verses' (verse, header_id, chapter_id) values ('%s', '%d', '%d')" %
-                                              (verse.text.replace("'", "\""), header_id, chapter_id))
+                            self.conn.execute("INSERT INTO 'verses' (verse, header_id, chapter_id, number) values ('%s', '%d', '%d', '%d')" %
+                                              (verse.text.replace("'", "\""), header_id, chapter_id, verse_number))
                         except sqlite3.OperationalError as e:
                             print "Book %s chapter %d verse %s" %(book.name, chapter_id, verse.text)
                             raise e
@@ -36,8 +42,8 @@ class BibleSqliteSaver(object):
         self.conn.execute('''CREATE TABLE books
             (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)''')
         self.conn.execute(''' CREATE TABLE chapters
-            (id INTEGER PRIMARY KEY, name TEXT, book_id INTEGER)''')
+            (id INTEGER PRIMARY KEY, number INTEGER, name TEXT, book_id INTEGER)''')
         self.conn.execute(''' CREATE TABLE headers
-            (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, chapter_id v)''')
+            (id INTEGER PRIMARY KEY AUTOINCREMENT, number INTEGER, name TEXT, chapter_id v)''')
         self.conn.execute(''' CREATE TABLE verses
-            (id INTEGER PRIMARY KEY, verse TEXT, header_id INTEGER, chapter_id INTEGER)''')
+            (id INTEGER PRIMARY KEY, number INTEGER, verse TEXT, header_id INTEGER, chapter_id INTEGER)''')

@@ -4,14 +4,19 @@
               android:layout_width="fill_parent"
               android:background="#000"
               android:layout_height="fill_parent">
-    <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="50dp"
-            android:gravity="center"
-            android:orientation="vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:orientation="vertical">
+        <LinearLayout
+                android:id="@+id/book_title_view"
+                android:layout_width="fill_parent"
+                android:clickable="true"
+                android:focusable="true"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:orientation="vertical">
             <TextView
                     android:id="@+id/book_title_book_name"
-                    android:text="Genesis"
+                    android:text="Ыйык Китеп"
                     android:textSize="18dp"
                     android:typeface="sans"
                     android:textStyle="bold"
@@ -20,12 +25,25 @@
                     android:layout_height="wrap_content"/>
             <TextView
                     android:id="@+id/book_title_book_version"
-                    android:text="King James Version"
+                    android:text="Кыргыз тилинде"
                     android:textSize="12dp"
                     android:typeface="sans"
                     android:paddingTop="0dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
+        </LinearLayout>
+            <GridView android:id="@+id/book_books_grid_view"
+                      android:layout_width="match_parent"
+                      android:layout_height="350dp"
+                      android:gravity="center"
+                      android:columnWidth="100dp"
+                      android:numColumns="auto_fit"
+                      android:verticalSpacing="10dp"
+                      android:horizontalSpacing="10dp"
+                      android:background="#ffc9c9c9"
+                      android:visibility="gone"
+                      android:stretchMode="columnWidth">
+            </GridView>
     </LinearLayout>
     <ListView
             android:id="@+id/book_content_list_view"

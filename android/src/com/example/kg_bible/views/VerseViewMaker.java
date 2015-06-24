@@ -23,7 +23,7 @@ public class VerseViewMaker {
         numberTextView.setText(bibleVerse.number+"");
 
         TextView verseTextView = (TextView) view.findViewById(R.id.verse_text);
-        verseTextView.setText((bibleVerse.number<10?"    ":"      ")+ bibleVerse.text);
+        verseTextView.setText((bibleVerse.number<10?"   ":(bibleVerse.number<100?"     ":"      "))+ bibleVerse.text);
         return view;
     }
 }

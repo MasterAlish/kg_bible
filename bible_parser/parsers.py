@@ -113,7 +113,7 @@ class BibleBookParser(object):
         result = result.replace("&#1199;", "ү")
         result = result.replace("&#1186;", "Ң")
         result = result.replace("&#1187;", "ң")
-        return result
+        return result.strip()
 
     def index_of(self, substr, last_index):
         try:

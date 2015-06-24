@@ -162,7 +162,8 @@ public class BibleReader {
         while(cursor.moveToNext()) {
             BibleBook book= new BibleBook();
             book.id = cursor.getInt(cursor.getColumnIndex("id"));
-            book.name = cursor.getString(cursor.getColumnIndex("name"));
+            String name = cursor.getString(cursor.getColumnIndex("name"));
+            book.name = name.substring(0,1).toUpperCase() + name.substring(1).toLowerCase();;
             books.add(book);
         }
         cursor.close();

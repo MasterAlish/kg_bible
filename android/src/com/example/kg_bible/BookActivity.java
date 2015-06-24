@@ -8,10 +8,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.TranslateAnimation;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import com.example.kg_bible.db.BibleReader;
 import com.example.kg_bible.db.SQLiteDelegate;
 import com.example.kg_bible.db.SQLiteHelper;
@@ -22,6 +19,8 @@ import com.example.kg_bible.models.BibleVerse;
 import com.example.kg_bible.new_techs.NSIndexPath;
 import com.example.kg_bible.new_techs.NSListViewAdapter;
 import com.example.kg_bible.new_techs.NSListViewDataSource;
+import com.example.kg_bible.views.BooksMenuAdapter;
+import com.example.kg_bible.views.ChaptersMenuAdapter;
 import com.example.kg_bible.views.HeaderViewMaker;
 import com.example.kg_bible.views.VerseViewMaker;
 
@@ -30,6 +29,8 @@ public class BookActivity extends Activity implements SQLiteDelegate, NSListView
     private BibleChapter currentChapter;
     private ProgressDialog progress;
     private TextView bookNameView, bookVersionView;
+    private GridView booksMenuGridView;
+    private LinearLayout bookTitleView;
     private ListView versesList;
     private NSListViewAdapter versesAdapter;
     private BibleReader bibleReader;
@@ -37,6 +38,8 @@ public class BookActivity extends Activity implements SQLiteDelegate, NSListView
     private SQLiteHelper helper;
     private int currentChapterIndex = 0;
     private int currentBookIndex = 0;
+    private BooksMenuAdapter booksMenuAdapter;
+    private ChaptersMenuAdapter chaptersMenuAdapter;
 
     /**
      * Called when the activity is first created.
@@ -51,6 +54,13 @@ public class BookActivity extends Activity implements SQLiteDelegate, NSListView
     }
 
     private void initUI() {
+        booksMenuAdapter = new BooksMenuAdapter(this, 0);
+        chaptersMenuAdapter = new ChaptersMenuAdapter(this, 0);
+        booksMenuGridView = (GridView) findViewById(R.id.book_books_grid_view);
+        booksMenuGridView.setAdapter(booksMenuAdapter);
+        booksMenuGridView.setOnItemClickListener(bookChosenListener);
+        bookTitleView = (LinearLayout) findViewById(R.id.book_title_view);
+        bookTitleView.setOnClickListener(titleClickListener);
         bookNameView = (TextView) findViewById(R.id.book_title_book_name);
         bookVersionView = (TextView) findViewById(R.id.book_title_book_version);
         versesList = (ListView) findViewById(R.id.book_content_list_view);
@@ -60,6 +70,47 @@ public class BookActivity extends Activity implements SQLiteDelegate, NSListView
         versesList.setOnTouchListener(swipeDetector);
         versesList.setOnItemClickListener(listener);
     }
+
+    private int selectedOnMenuBookIndex;
+
+    AdapterView.OnItemClickListener bookChosenListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int which, long l) {
+            selectedOnMenuBookIndex = which;
+            BibleBook book = bible.books.get(which);
+            book.chapters = bibleReader.getBlankChapters(book);
+            chaptersMenuAdapter.setBook(book);
+            chaptersMenuAdapter.notifyDataSetChanged();
+            booksMenuGridView.setColumnWidth(30);
+            booksMenuGridView.setAdapter(chaptersMenuAdapter);
+            booksMenuGridView.setOnItemClickListener(chapterChosenListener);
+        }
+    };
+
+    AdapterView.OnItemClickListener chapterChosenListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int which, long l) {
+            currentBookIndex = selectedOnMenuBookIndex;
+            currentChapterIndex = which;
+            loadBibleChapter(currentBookIndex, currentChapterIndex);
+            titleClickListener.onClick(null);
+        }
+    };
+
+    View.OnClickListener titleClickListener = new View.OnClickListener() {
+        boolean booksMenuExpanded = false;
+        @Override
+        public void onClick(View view) {
+            booksMenuGridView.setColumnWidth(90);
+            booksMenuGridView.setAdapter(booksMenuAdapter);
+            booksMenuGridView.setOnItemClickListener(bookChosenListener);
+            if(booksMenuExpanded)
+                booksMenuGridView.setVisibility(View.GONE);
+            else
+                booksMenuGridView.setVisibility(View.VISIBLE);
+            booksMenuExpanded = !booksMenuExpanded;
+        }
+    };
 
     AdapterView.OnItemClickListener listener = new AdapterView.OnItemClickListener() {
         @Override
@@ -126,6 +177,8 @@ public class BookActivity extends Activity implements SQLiteDelegate, NSListView
         progress.dismiss();
         bibleReader = new BibleReader(db);
         bible = bibleReader.getBlankBible();
+        booksMenuAdapter.setBible(bible);
+        booksMenuAdapter.notifyDataSetChanged();
         loadBibleChapter(currentBookIndex, currentChapterIndex);
     }
 
@@ -138,6 +191,7 @@ public class BookActivity extends Activity implements SQLiteDelegate, NSListView
         currentChapter.spreadVersesByHeaders();
         versesAdapter.notifyDataSetChanged();
         versesList.setSelectionAfterHeaderView();
+        bookNameView.setText(String.format("%s %d",book.name, currentChapter.number));
     }
 
     @Override
